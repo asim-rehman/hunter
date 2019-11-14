@@ -1,0 +1,113 @@
+﻿@page "/devices/edit/{id:guid}"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Components
+@inject DevicesService DeviceService
+@inject IUriHelper UriHelper
+
+
+@inherits BasePage
+
+<Header Title="Edit Device" ShowLoader="@ShowLoader" />
+
+@if (!string.IsNullOrEmpty(editResponsePost.Content))
+{
+    <AjaxResponse Status="@editResponsePost.Status" Content="@editResponsePost.Content" />
+}
+else
+{
+    <AjaxResponse Status="@editResponse.Status" Content="@editResponse.Content" />
+}
+
+
+<EditForm Model="@editResponse" OnValidSubmit="@Save">
+    <ValidationSummary />
+
+    @if (editResponse.Entity != null)
+    {
+        <div class="form-group">
+            <div class="col-sm-2">
+                <label>Name</label>
+            </div>
+            <div class="col-sm-5">
+                <InputText @bind-value="@editResponse.Entity.Name" Class="form-control" />
+                <small id="nameHelp" class="form-text text-muted">(required)  The name of the device</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-2">
+                <label>Manufacturer</label>
+            </div>
+            <div class="col-sm-5">
+                <InputText @bind-value="@editResponse.Entity.Manufacturer" Id="Manufacturer" Class="form-control" />
+                <small id="manufacturerHelp" class="form-text text-muted">(required)  Device manufacturer</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-2">
+                <label>Model</label>
+            </div>
+            <div class="col-sm-5">
+                <InputText @bind-value="@editResponse.Entity.Model" Id="Model" Class="form-control" />
+                <small id="modelHelp" class="form-text text-muted">(required) The device model</small>
+            </div>
+        </div>
+
+        <div class="actionbar">
+            <a class="btn btn-secondary" href="devices">
+                <span class="fa fa-arrow-left"></span>
+                Back
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <span class="fa fa-save"></span>
+                Save
+            </button>
+        </div>
+
+    }
+    else
+    {
+        <loadingmesage />
+    }
+
+
+</EditForm>
+
+@functions
+{
+
+    ResponseModel<Devices> editResponse = new ResponseModel<Devices>();
+    ResponseModel<Devices> editResponsePost = new ResponseModel<Devices>();
+
+
+    [Parameter]
+    Guid id { get; set; }
+
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        await GetDevice();
+    }
+
+    private async Task GetDevice()
+    {
+        ShowLoader = true;
+        editResponse = await DeviceService.Edit(id);
+        ShowLoader = false;
+    }
+
+    private async Task Save()
+    {
+
+        ShowLoader = true;
+        editResponsePost = await DeviceService.Edit(editResponse.Entity);
+        ShowLoader = false;
+        await GetDevice();
+
+    }
+
+}

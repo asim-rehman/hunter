@@ -1,0 +1,67 @@
+﻿@inherits LayoutComponentBase
+@using  Hunter.Web.Client.Services
+@inject BaseService BaseService
+@inject AppState AppState
+@inject IUriHelper UriHelper
+
+<div class="wrapper" id="wrapper">
+    <aside class="sidebar">
+
+        <nav class="logo">
+            <h4>HUNTER</h4>
+
+        </nav>
+        @if (AppState.IsLoggedIn)
+        {
+
+
+            <nav class="nav">
+
+                <ul class="nav flex-column">
+                    <li>
+
+                        <NavLink class="nav-link" href="/users/account" Match="NavLinkMatch.All">
+                            <span class="fa fa-user-circle"></span>
+                            <h6>Hi, @BaseService.User.FirstName!</h6>
+                        </NavLink>
+
+                    </li>
+                    <li>
+                        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                            <span class="fa fa-mobile"></span>
+                            <h6>Devices</h6>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="nav-link" href="/users" Match="NavLinkMatch.All">
+                            <span class="fa fa-users"></span>
+                            <h6>Users</h6>
+                        </NavLink>
+                    </li>
+                    <li>
+
+                        <NavLink class="nav-link" href="" onclick="@Logout" Match="NavLinkMatch.All">
+                            <span class="fa fa-unlock"></span>
+                            <h6>Logout</h6>
+                        </NavLink>
+
+                    </li>
+                </ul>
+
+            </nav>
+        }
+    </aside>
+    <main role="main" class="content" id="app">
+
+        @Body
+
+    </main>
+</div><!--end container fluid-->
+@functions
+{
+    public void Logout()
+    {
+        AppState.Logout();
+        UriHelper.NavigateTo("/users/login");
+    }
+}

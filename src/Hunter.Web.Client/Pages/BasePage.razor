@@ -1,0 +1,51 @@
+﻿@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Models.Entities
+@inject AppState  AppState
+@inject BaseService BaseService
+@inject IUriHelper UriHelper
+
+
+@functions{
+    public bool ShowLoader { get; set; }
+    public User User
+    {
+        get
+        {
+            return BaseService.User;
+        }
+    }
+    public string BASE_URL
+    {
+        get
+        {
+            return BaseService.BASE_URL;
+        }
+    }
+
+    public string RELATIVE_PATH
+    {
+        get
+        {
+            return UriHelper.ToBaseRelativePath(UriHelper.GetBaseUri(), UriHelper.GetAbsoluteUri());
+        }
+    }
+
+    protected override async Task OnInitAsync()
+    {
+        string[] excludeUrls = new string[] { "users/login", "users/add" };
+        if (!AppState.IsLoggedIn && !excludeUrls.Contains(RELATIVE_PATH))
+        {
+            UriHelper.NavigateTo("/users/login");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        string token = await AppState.GetAccessToken();
+        if(AppState.IsLoggedIn && token != User.Token)
+        {
+            BaseService.User.Token = null;
+            UriHelper.NavigateTo("/users/login");
+        }
+    }
+}

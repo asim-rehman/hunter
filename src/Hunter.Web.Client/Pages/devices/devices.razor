@@ -1,0 +1,108 @@
+﻿@page "/"
+@page "/devices"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@using Newtonsoft.Json
+@using System.Text
+@using System.Linq
+@inject DevicesService DeviceService
+@inject IJSRuntime IJSRuntime
+@inherits BasePage
+
+
+<Header Title="Devices" ShowLoader="@ShowLoader" />
+
+@if (!string.IsNullOrEmpty(deleteResponseModel.Content))
+{
+    <AjaxResponse Content="@deleteResponseModel.Content" Status="@deleteResponseModel.Status" />
+}
+else
+{
+    <AjaxResponse Content="@responseModel.Content" Status="@responseModel.Status" />
+}
+@if (responseModel.Entity != null)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><span class="fa fa-id-card"></span>&nbsp;ID</th>
+                <th><span class="fa fa-mobile"></span>&nbsp;Device Name</th>
+                <th><span class="fa fa-building"></span>&nbsp;Device Manufacturer</th>
+                <th><span class="fa fa-mobile-alt"></span>&nbsp;Device Model</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in responseModel.Entity)
+            {
+                <tr id="@item.Id">
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Manufacturer</td>
+                    <td>@item.Model</td>
+                    <td>
+                        <a title="Add Task" class="btn btn-primary  fa fa-plus" href="/tasks/add/@item.Id"></a>
+                        <a title="View Tasks (@item.Tasks.Count)" class="btn btn-secondary   fa fa-tasks" href="/tasks/@item.Id">
+                            <span class="badge badge-primary">@item.Tasks.Count</span>
+                        </a>
+                        <a title="Edit Device" class="btn btn-success  fa fa-edit" href="/devices/edit/@item.Id"></a>
+                        <a title="Generate File" class="btn btn-blue fa fa-download" onclick="@(()=>GenerateFile(item.Id))"></a>
+                        <a title="Delete Device" class="btn btn-danger fa fa-trash" data-toggle="modal" onclick="@(() => Delete(item.Id))"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="actionbar">
+        <a class="btn btn-primary" href="/devices/add">
+            <span class="fa fa-plus"></span>
+            New Device
+        </a>
+    </div>
+}
+else
+{
+    <loadingmesage />
+}
+
+@functions {
+
+    ResponseModel<Devices[]> responseModel = new ResponseModel<Devices[]>();
+    ResponseModel<Devices> deleteResponseModel = new ResponseModel<Devices>();
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        await GetDevices();
+    }
+
+    private async Task GetDevices()
+    {
+        ShowLoader = true;
+        responseModel = await DeviceService.GetDevices();
+        ShowLoader = false;
+    }
+
+    public async Task Delete(Guid id)
+    {
+        ShowLoader = true;
+        StateHasChanged();
+        deleteResponseModel = await DeviceService.Delete(id);
+        await GetDevices();
+        StateHasChanged();
+    }
+
+    public async Task GenerateFile(Guid id)
+    {
+        ShowLoader = true;
+        StateHasChanged();
+        var data = new { DeviceId = id, BaseURL = BASE_URL };
+        string json = JsonConvert.SerializeObject(data);
+        byte[] bytes = Encoding.ASCII.GetBytes(json.ToCharArray());
+        await IJSRuntime.InvokeAsync<object>("saveAsFile", id.ToString()+".json", Convert.ToBase64String(bytes));
+        ShowLoader = false;
+        StateHasChanged();
+    }
+}

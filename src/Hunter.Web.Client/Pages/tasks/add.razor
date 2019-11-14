@@ -1,0 +1,103 @@
+﻿@page "/tasks/add/{id:guid}"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Enums
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Components
+@inject TasksService TaskService
+@inject IUriHelper UriHelper
+
+
+@inherits BasePage
+
+
+<Header Title="Add Task" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@responseModel.Content" Status="@responseModel.Status" />
+
+
+<EditForm Model="@postModel" OnValidSubmit="@Save">
+    <ValidationSummary />
+
+    <div class="form-group">
+        <div class="col-md-8">
+            <div role="alert" class="alert alert-info">
+                <span class="fa fa-info-circle"></span>
+                <strong>Once a task has been created you will not be able to edit it.</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Task Type</label>
+        </div>
+        <div class="col-sm-3">
+            <InputSelect T="@TaskType" @bind-value="@postModel.TaskType">
+                @foreach (TaskType item in Enum.GetValues(typeof(TaskType)))
+                {
+                    <option value="@item">@item</option>
+                }
+            </InputSelect>
+            <small id="nameHelp" class="form-text text-muted">(required)  Task Type</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Interval Days</label>
+        </div>
+        <div class="col-sm-3">
+            <InputNumber T="int" @bind-value="@postModel.IntervalDays" Id="IntervalDays" Class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Interval Seconds</label>
+        </div>
+        <div class="col-sm-3">
+            <InputNumber T="int" @bind-value="@postModel.IntervalSeconds" Id="IntervalSeconds" Class="form-control" />
+        </div>
+    </div>
+
+    <div class="actionbar">
+        <a class="btn btn-secondary" href="/tasks/@id">
+            <span class="fa fa-arrow-left"></span>
+            Back
+        </a>
+        <button class="btn btn-primary" type="submit">
+            <span class="fa fa-save"></span>
+            Save
+        </button>
+    </div>
+</EditForm>
+
+
+@functions
+{
+    Tasks postModel = new Tasks();
+    ResponseModel<Tasks> responseModel = new ResponseModel<Tasks>();
+    [Parameter]
+    Guid id { get; set; }
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        responseModel.Entity = postModel;
+    }
+
+    private async Task Save()
+    {
+        ShowLoader = true;
+        responseModel.Entity.DeviceId = id;
+
+        responseModel = await TaskService.Create(responseModel.Entity);
+        responseModel.Entity = postModel;
+        if (responseModel.Status == Enums.ResponseType.success.GetName())
+        {
+            ShowLoader = false;
+            UriHelper.NavigateTo("/tasks/" + id);
+        }
+    }
+
+}

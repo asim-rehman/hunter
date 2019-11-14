@@ -1,0 +1,21 @@
+﻿@using  Hunter.Web.Client.Services
+@using Hunter.Web.Client.Models
+
+
+@if (!string.IsNullOrEmpty(Content))
+{
+    <div class="@(Status == "success" ? "ajaxresponse  bg-green  " :"ajaxresponse bg-danger")">
+        <span v-bind:class="fa fa-check"></span>
+        @Content
+    </div>
+}
+
+
+
+@functions
+{
+    [Parameter]
+    public string Status { get; set; }
+    [Parameter]
+    public string Content { get; set; }
+}

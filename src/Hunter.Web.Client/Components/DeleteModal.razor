@@ -1,0 +1,27 @@
+﻿<div class="modal fade" id="deleteDeviceModal" tabindex="-1" role="dialog" aria-labelledby="deleteDeviceModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDeviceModalTitle"><span class="fa fa-warning"></span>&nbsp;@Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <strong>@Content</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times"></span>&nbsp;No</button>
+                <button type="button" id="btnDeleteDevice" class="btn btn-danger"><span class="fa fa-trash"></span>&nbsp;Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions
+{
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public string Content { get; set; }
+}

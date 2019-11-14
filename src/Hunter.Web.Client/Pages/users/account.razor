@@ -1,0 +1,90 @@
+﻿@page "/users/account"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@using System.Collections.ObjectModel
+@inject UsersService UsersService
+@inject IUriHelper UriHelper
+
+
+@inherits BasePage
+
+
+<Header Title="Change Password" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@responseModel.Content" Status="@responseModel.Status" />
+
+<EditForm Model="@responseModel" OnValidSubmit="@Save">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Current Password</label>
+        </div>
+        <div class="col-sm-3">
+            <InputText AdditionalAttributes="@readOnly" @bind-value="@ChangePasswordModel.CurrentPassword" Class="form-control" />
+            <ValidationMessage For="@(() => ChangePasswordModel.CurrentPassword)" />
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>New Password</label>
+        </div>
+        <div class="col-sm-3">
+            <InputText AdditionalAttributes="@readOnly" @bind-value="@ChangePasswordModel.NewPassword" Class="form-control" />
+            <ValidationMessage For="@(() => ChangePasswordModel.NewPassword)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Confirm Password</label>
+        </div>
+        <div class="col-sm-3">
+            <InputText AdditionalAttributes="@readOnly" @bind-value="@ChangePasswordModel.ConfirmPassword" Class="form-control" />
+            <ValidationMessage For="@(() => ChangePasswordModel.ConfirmPassword)" />
+        </div>
+    </div>
+
+    <div class="actionbar">
+        <a class="btn btn-secondary" href="/users">
+            <span class="fa fa-arrow-left"></span>
+            Back
+        </a>
+        <button class="btn btn-primary" type="submit">
+            <span class="fa fa-save"></span>
+            Save
+        </button>
+    </div>
+</EditForm>
+
+@functions
+{
+    ChangePasswordModel ChangePasswordModel = new ChangePasswordModel();
+    ResponseModel<ChangePasswordModel> responseModel = new ResponseModel<ChangePasswordModel>();
+
+    IDictionary<string, object> keyValuePairs = new Dictionary<string, object>();
+    IReadOnlyDictionary<string, object> readOnly = null;
+
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        responseModel.Entity = ChangePasswordModel;
+        keyValuePairs.Add("type", "password");
+        readOnly = new ReadOnlyDictionary<string, object>(keyValuePairs);
+    }
+
+    private async Task Save()
+    {
+        ShowLoader = true;
+        responseModel = await UsersService.ChangePassword(responseModel.Entity);
+        responseModel.Entity = ChangePasswordModel;
+        ShowLoader = false;
+    }
+
+}

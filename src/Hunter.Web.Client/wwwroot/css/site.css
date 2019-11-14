@@ -1,0 +1,257 @@
+﻿body {
+}
+
+:root {
+    --outer-space: #424C55;
+    --orange: #FF8300;
+    --platinum: #E4E4E4;
+    --charcoal: #38444E;
+    --white: #fff;
+    --black: #000;
+    --danger: #dc3545;
+    --green: #49A54D;
+}
+
+.bg-outerspace {
+    background-color: var(--outer-space);
+}
+
+.bg-orange {
+    background-color: var(--orange);
+}
+
+.bg-platinum {
+    background-color: var(--platinum);
+}
+
+.bg-white {
+    background-color: var(--white);
+}
+
+.bg-black {
+    background-color: var(--black);
+}
+
+.bg-charcoal {
+    background-color: var(--charcoal);
+}
+
+.bg-danger {
+    background-color: var(--danger);
+}
+
+.bg-green {
+    background-color: var(--green);
+}
+
+.bg-blue{
+    background-color:var(--blue);
+}
+
+.color-black {
+    color: var(--black);
+}
+
+.color-charcoal {
+    color: var(--charcoal);
+}
+
+.color-white {
+    color: var(--white);
+}
+
+.btn {
+    border: none !important;
+    border-radius: 0px;
+    cursor: pointer;
+    border: none;
+    box-shadow: none;
+    color: #fff !important;
+}
+
+    .btn:focus {
+        box-shadow: none !important;
+    }
+
+    .btn.btn-primary {
+        background-color: var(--orange);
+    }
+
+    .btn.btn-blue {
+        background-color: var(--blue);
+        color: #fff;
+    }
+
+    .btn.btn-primary:hover,
+    .btn.btn-primary:focus,
+    .btn.btn-primary:active {
+        background-color: var(--charcoal) !important;
+        border: none !important;
+    }
+
+.table {
+    margin-bottom: 0;
+}
+
+form {
+    padding: 20px;
+}
+
+.hide {
+    display: none;
+}
+
+.wrapper {
+    height: 100vh;
+    position: relative;
+}
+
+aside.sidebar {
+    width: 260px;
+    position: relative;
+    height: 100vh;
+    left: 0;
+    float: left;
+    display: block;
+    background-color: var(--outer-space);
+    box-shadow: 2px -5px 3px 1px #333333;
+    z-index: 1;
+}
+
+nav.logo {
+    padding: 15px 20px;
+    text-align: center;
+    border-bottom: 1px solid #bdbdbd;
+    width: 75%;
+    margin: 0 auto;
+    color: var(--white);
+}
+
+
+.sidebar ul.flex-column {
+    width: 100%;
+}
+
+ul.nav.flex-column li {
+    -webkit-transition: background-color linear 0.5s;
+}
+
+    ul.nav.flex-column li:hover {
+        background-color: var(--charcoal);
+        -webkit-transition: background-color linear 0.5s;
+    }
+
+    ul.nav.flex-column li a {
+        display: block;
+        padding: 15px 0px 15px 30px;
+    }
+
+        ul.nav.flex-column li a span.fa {
+            font-size: 1.5em;
+            float: left;
+            width: 30px;
+            margin-right: 10px;
+            color: var(--orange);
+        }
+
+        ul.nav.flex-column li a h6 {
+            display: inline-block;
+            margin-left: 10px;
+            color: var(--white);
+        }
+
+main.content {
+    position: relative;
+    float: right;
+    width: calc(100% - 260px);
+    background-color: var(--white);
+    height: 100vh;
+}
+
+.content .titlebar {
+    min-height: 65px;
+    background-color: var(--outer-space);
+    color: var(--white);
+}
+
+.content .actionbar {
+    padding: 10px 0 0 15px;
+}
+
+/*------*/
+ul.validation-errors {
+    list-style-type: none;
+    padding-left: 15px;
+}
+
+.validation-message {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--red);
+}
+
+    .validation-message:before {
+        font-family: 'fontawesome';
+        content: '\f00d';
+        margin-right: 10px;
+    }
+
+
+
+div#app {
+    position: relative;
+}
+
+.loader {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.4196078431372549);
+    width: 100%;
+    height: 100%;
+    z-index: 100000
+}
+
+.loader-svg {
+    width: 200px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: calc(100vh - 260px)
+}
+
+
+.ajaxresponse {
+    padding: 20px;
+    color: #fff;
+}
+
+    .ajaxresponse span.fa {
+        margin-right: 10px;
+    }
+
+    #map{
+        height:70%;
+    }
+
+    /*-------------*/
+.device.col-sm-2 p {
+    margin: 0;
+}
+
+.device.col-sm-2 {
+    background-color: #fdfdfd;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px dashed;
+}
+
+.row.device-info-wrapper {
+    padding: 30px;
+    margin-right:0;
+}
+
+    .row.device-info-wrapper h4 {
+        clear: both;
+        display: block;
+        height: 0;
+    }

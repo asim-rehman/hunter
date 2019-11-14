@@ -1,0 +1,113 @@
+﻿@page "/tasks/data/map/{id:guid}/{deviceid:guid}"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@using System.Threading
+@inject TasksDataService TasksDataService
+@inject IUriHelper uriHelper
+@inject IJSRuntime IJSRuntime
+@inherits BasePage
+
+
+<Header Title="Device Location History" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@response.Content" Status="@response.Status" />
+
+
+<div id="map"></div>
+
+<div class="actionbar">
+    <a class="btn btn-secondary" href="/tasks/@deviceid">
+        <span class="fa fa-arrow-left"></span>
+        Back
+    </a>
+</div>
+
+@functions
+{
+    [Parameter]
+    Guid? id { get; set; }
+    [Parameter]
+    Guid? deviceid { get; set; }
+
+    ResponseModel<Location[]> response = new ResponseModel<Location[]>();
+    Timer timer = null;
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        if (!id.HasValue)
+        {
+            uriHelper.NavigateTo("/");
+        }
+
+        await GetLocations();
+
+
+    }
+
+    private async Task GetLocations()
+    {
+        if (RELATIVE_PATH != "tasks/data/map/" + id + "/" + deviceid)
+        {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+        else
+        {
+            ShowLoader = true;
+            response = await TasksDataService.GetLocationData(id.Value);
+            ShowLoader = false;
+        }
+
+    }
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        if (response.Entity != null)
+        {
+            int milliseconds = 60 * 1000;
+            timer = new Timer(async (e) =>
+            {
+                await GetLocations();
+                await Invoke(() => { StateHasChanged(); });
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+            }, null, milliseconds, Timeout.Infinite);
+        }
+        await RenderMap();
+    }
+
+    private async Task RenderMap()
+    {
+        if (response.Entity != null)
+        {
+            ShowLoader = true;
+            await IJSRuntime.InvokeAsync<object>("initMap");
+            double lastLoc = 0;
+            double lastLat = 0;
+            for (int i = 0; i < response.Entity.Length; i++)
+            {
+                var loc = response.Entity[i];
+                var image = "/images/orange.png";
+                var title = "Route Path: " + i.ToString() + " Of " + response.Entity.Length;
+                if (i == 0)
+                {
+                    image = "/images/green.png";
+                    title = "Starting Location";
+                }
+                else if (i == response.Entity.Length - 1)
+                {
+                    image = "/images/red.png";
+                    title = "Last Known Location";
+                }
+                title += "\n Latitude:" + loc.Latitude + "\n" + " Longitude: " + loc.Longitude;
+
+
+                await IJSRuntime.InvokeAsync<object>("addMarker", loc.Latitude, loc.Longitude, title, image);
+                lastLat = loc.Latitude;
+                lastLoc = loc.Longitude;
+            }
+            await IJSRuntime.InvokeAsync<object>("setCenter", lastLat, lastLoc);
+            ShowLoader = false;
+        }
+    }
+}

@@ -1,0 +1,92 @@
+﻿@page "/users"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@inject UsersService UsersService
+@inject AppState  AppState
+@inherits BasePage
+
+
+<Header Title="Users" ShowLoader="@ShowLoader" />
+@if (!string.IsNullOrEmpty(deleteResponseModel.Content))
+{
+    <AjaxResponse Content="@deleteResponseModel.Content" Status="@deleteResponseModel.Status" />
+}
+else
+{
+    <AjaxResponse Content="@responseModel.Content" Status="@responseModel.Status" />
+}
+@if (responseModel.Entity != null && responseModel.Entity.Length > 0)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><span class="fa fa-id-card"></span>&nbsp;ID</th>
+                <th><span class="fa fa-user"></span>&nbsp;UserName</th>
+                <th><span class="fa fa-user"></span>&nbsp;First Name</th>
+                <th><span class="fa fa-user"></span>&nbsp;Last Name</th>
+                <th><span class="fa fa-info-circle"></span>&nbsp;Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in responseModel.Entity)
+            {
+                <tr id="@item.Id">
+                    <td>@item.Id</td>
+                    <td>@item.Username</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>
+                        @if (User.Id != item.Id)
+                        {
+                            <a title="Delete User" class="btn btn-danger fa fa-trash" data-toggle="modal" onclick="@(() => Delete(item.Id))"></a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <loadingmesage />
+}
+
+
+
+
+<div class="actionbar">
+    <a class="btn btn-primary" href="/users/add">
+        <span class="fa fa-plus"></span>
+        New User
+    </a>
+</div>
+
+@functions {
+
+    ResponseModel<User[]> responseModel = new ResponseModel<User[]>();
+    ResponseModel<User> deleteResponseModel = new ResponseModel<User>();
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        await GetUsers();
+    }
+
+    private async Task GetUsers()
+    {
+        ShowLoader = true;
+        responseModel = await UsersService.GetUsers();
+        ShowLoader = false;
+    }
+
+    public async Task Delete(Guid id)
+    {
+        ShowLoader = true;
+        StateHasChanged();
+        deleteResponseModel = await UsersService.Delete(id);
+        await GetUsers();
+        StateHasChanged();
+    }
+}

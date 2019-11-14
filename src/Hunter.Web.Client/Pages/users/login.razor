@@ -1,0 +1,86 @@
+﻿@page "/users/login/"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities
+@using Hunter.Web.Client.Components
+@using System.Collections.ObjectModel
+@inject AppState LoginService
+@inject IUriHelper UriHelper
+@inject IJSRuntime jsRuntime
+
+@inherits BasePage
+
+
+<Header Title="Login" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@response.Content" Status="@response.Status" />
+
+<EditForm Model="@user" OnValidSubmit="@Save">
+    <div class="form-group">
+        <div class="col-md-8">
+            <div role="alert" class="alert alert-info">
+                <span class="fa fa-info-circle"></span>
+                <strong>Please login below or <a href="/users/add">Register</a></strong>
+            </div>
+        </div>
+    </div>
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Username (Email)</label>
+        </div>
+        <div class="col-sm-3">
+            <InputText @bind-value="@user.Username" Class="form-control" />
+            <ValidationMessage For="@(()=>user.Username)" />
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Password</label>
+        </div>
+        <div class="col-sm-3">
+            <InputText AdditionalAttributes="@readOnly" @bind-value="@user.Password" Class="form-control" />
+            <ValidationMessage For="@(()=>user.Password)" />
+        </div>
+    </div>
+
+    <div class="actionbar">
+        <button class="btn btn-primary" type="submit">
+            <span class="fa fa-save"></span>
+            Login
+        </button>
+    </div>
+</EditForm>
+
+@functions
+{
+    LoginModel user = new LoginModel();
+    ResponseModel<LoginModel> responseModel = new ResponseModel<LoginModel>();
+    ResponseModel<User> response = new ResponseModel<User>();
+    IDictionary<string, object> keyValuePairs = new Dictionary<string, object>();
+    IReadOnlyDictionary<string, object> readOnly = null;
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        responseModel.Entity = user;
+        keyValuePairs.Add("type", "password");
+        readOnly = new ReadOnlyDictionary<string, object>(keyValuePairs);
+    }
+
+    private async Task Save()
+    {
+        ShowLoader = true;
+        response = await LoginService.Login(responseModel.Entity);
+        if (LoginService.IsLoggedIn)
+        {
+            UriHelper.NavigateTo("/devices");
+        }
+        ShowLoader = false;
+        responseModel.Entity = user;
+    }
+
+}

@@ -1,0 +1,163 @@
+﻿@page "/tasks/data/device/{id:guid}/{deviceid:guid}"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@using System.Threading
+
+@inject TasksDataService TasksDataService
+@inject IUriHelper uriHelper
+@inject IJSRuntime IJSRuntime
+@inherits BasePage
+
+<Header Title="Device Information" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@response.Content" Status="@response.Status" />
+
+@if (response.Entity != null && response.Entity.Count > 0)
+{
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>
+                    <span class="fa fa-building"></span>&nbsp;Manufacturer/Model
+                </th>
+                <th>
+                    <span class="fa fa-key"></span>&nbsp;Security Patch/OS Version
+                </th>
+                <th>
+                    <span class="fa fa-microchip"></span>&nbsp;Board
+                </th>
+                <th>
+                    <span class="fa fa-microchip"></span>&nbsp;Codename
+                </th>
+                <th>
+                    <span class="fa fa-microchip"></span>&nbsp;Hardware
+                </th>
+                <th>
+                    <span class="fa fa-android"></span>&nbsp;SDK
+                </th>
+                <th>
+                    <span class="fa fa-random"></span>&nbsp;MEID
+                </th>
+                <th>
+                    <span class="fa fa-random"></span>&nbsp;IMEI
+                </th>
+                <th>
+                    <span class="fa fa-sim-card"></span>&nbsp;Sim Serial
+                </th>
+                <th>
+                    <span class="fa fa-sim-card"></span>&nbsp;Sim Operator
+                </th>
+                <th>
+                    <span class="fa fa-clock"></span>&nbsp;Device Date/Time
+                </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var device in response.Entity)
+            {
+                <tr>
+                    <td>@device.Manufacturer/@device.Model   </td>
+                    <td>@device.SecurityPatch/@device.Version   </td>
+                    <td>@device.Board           </td>
+                    <td>@device.Codename        </td>
+                    <td>@device.Hardware        </td>
+                    <td>@device.SDK             </td>
+                    @if (device.NetworkInfo != null)
+                    {
+                        <td>@device.NetworkInfo.MEID             </td>
+                        <td>@device.NetworkInfo.IMEI             </td>
+                        <td>@device.NetworkInfo.SimSerialNumber             </td>
+                        <td>@device.NetworkInfo.CarrierName             </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    }
+
+                    <td>@device.CurrentDateTime </td>
+                </tr>
+            }
+        </tbody>
+
+
+    </table>
+
+
+    <div class="actionbar">
+        <a class="btn btn-secondary" href="/tasks/@deviceid">
+            <span class="fa fa-arrow-left"></span>
+            Back
+        </a>
+    </div>
+}
+else
+{
+    <loadingmesage />
+}
+
+@functions
+{
+    [Parameter]
+    Guid? id { get; set; }
+    [Parameter]
+    Guid? deviceid { get; set; }
+
+    ResponseModel<List<DeviceInfo>> response = new ResponseModel<List<DeviceInfo>>();
+
+    Timer timer = null;
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        if (!id.HasValue)
+        {
+            uriHelper.NavigateTo("/");
+        }
+
+
+
+        await GetDeviceInfo();
+    }
+
+    private async Task GetDeviceInfo()
+    {
+        if (RELATIVE_PATH != "tasks/data/device/" + id + "/" + deviceid)
+        {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+        else
+        {
+            ShowLoader = true;
+            response = await TasksDataService.GetDeviceInfo(id.Value);
+            ShowLoader = false;
+        }
+
+    }
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        if (response.Entity != null && response.Entity.Count() > 0)
+        {
+
+            var task = response.Entity.FirstOrDefault();
+            int milliseconds = 60 * 1000;
+            timer = new Timer(async (e) =>
+            {
+                await GetDeviceInfo();
+                await Invoke(() => { StateHasChanged(); });
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+            }, null, milliseconds, Timeout.Infinite);
+
+
+        }
+    }
+
+
+}

@@ -1,0 +1,147 @@
+﻿@page "/tasks/{id:guid}"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities;
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@inject TasksService TasksService
+@inject IUriHelper uriHelper
+@inherits BasePage
+
+
+<Header Title="Tasks" ShowLoader="@ShowLoader" />
+<AjaxResponse Content="@response.Content" Status="@response.Status" />
+
+@if (response.Entity != null)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><span class="fa fa-id-card color-orange"></span>&nbsp;ID</th>
+                <th><span class="fa fa-mobile"></span>&nbsp;Device</th>
+                <th> <span class="fa fa-running"></span>&nbsp;Status</th>
+                <th><span class="fa fa-mobile"></span>/<span class="fa fa-map-pin"></span>&nbsp;Type</th>
+                <th><span class="fa fa-calendar"></span>&nbsp;Days/Seconds</th>
+                <th><span class="fa fa-clock"></span>&nbsp;Next Run</th>
+                <th><span class="fa fa-clock"></span>&nbsp;Last Run</th>
+                <th><span class="fa fa-clock"></span>&nbsp;Start</th>
+                <th><span class="fa fa-clock"></span>&nbsp;End</th>
+                <th><span class="fa fa-info-circle"></span>&nbsp;Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in response.Entity)
+            {
+                string statusCss = "bg-green";
+                string statusFaCss = "fa-tasks";
+                switch (task.Status)
+                {
+                    case Enums.Status.Waiting:
+                        statusFaCss = "fa-clock";
+                        statusCss = "bg-orange";
+                        break;
+                    case Enums.Status.Running:
+                        statusFaCss = "fa-running";
+                        statusCss = "bg-blue";
+                        break;
+                    case Enums.Status.Completed:
+                        statusFaCss = "fa-check";
+                        statusCss = "bg-green";
+                        break;
+                }
+
+                <tr id="@task.Id">
+                    <td>
+                        <span class="fa fa-copy" title="@task.Id"></span>
+                    </td>
+                    <td>
+                        @if (@task.Device != null)
+                        {
+                            @task.Device.Name
+                        }
+                    </td>
+                    <td class="color-white @statusCss">
+                        <span class="fa @statusFaCss"></span>&nbsp;@task.Status
+                    </td>
+                    <td>
+  
+                        @task.TaskType
+                    </td>
+                    <td>@task.IntervalDays/@task.IntervalSeconds</td>
+                    <td>@task.NextRun</td>
+                    <td>
+                        @task.LastRun
+                    </td>
+                    <td>@task.Start</td>
+                    <td>@task.End.GetValueOrDefault()</td>
+                    <td>
+                        @if (task.TaskData.Count > 0)
+                        {
+                            string url = "/tasks/data/device/" + task.Id + "/" + task.Device.Id;
+                            string css = " fa-database";
+                            if (task.TaskType == Enums.TaskType.GetLocation)
+                            {
+                                url = "/tasks/data/map/" + task.Id + "/" + task.Device.Id;
+                                css = " fa-map";
+                            }
+
+                            <a title="View Task Data (@task.TaskData.Count)" class="btn btn-secondary fa @css" href="@url">
+                                <span class="badge badge-light">@task.TaskData.Count</span>
+                            </a>
+                        }
+                        <a title="Delete Task" class="btn btn-danger fa fa-trash" data-toggle="modal" onclick="@(() => Delete(task.Id))"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="actionbar">
+        <a class="btn btn-secondary" href="/">
+            <span class="fa fa-arrow-left"></span>
+            Back
+        </a>
+        <a class="btn btn-primary" href="/tasks/add/@id">
+            <span class="fa fa-plus"></span>
+            New Task
+        </a>
+    </div>
+}
+else
+{
+    <loadingmesage />
+}
+
+@functions {
+
+    ResponseModel<Tasks[]>
+    response = new ResponseModel<Tasks[]>();
+    [Parameter]
+    Guid? id { get; set; }
+
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+        if (!id.HasValue)
+        {
+            uriHelper.NavigateTo("/");
+        }
+        await GetTasks();
+    }
+
+    private async Task GetTasks()
+    {
+        ShowLoader = true;
+        response = await TasksService.GetTasks(id.Value);
+        ShowLoader = false;
+    }
+
+    public async Task Delete(Guid id)
+    {
+        ShowLoader = true;
+        StateHasChanged();
+        await TasksService.Delete(id);
+        await GetTasks();
+        StateHasChanged();
+    }
+
+}

@@ -1,0 +1,46 @@
+﻿@page "/"
+@namespace Hunter.Web.Client.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Title</title>
+    <base href="~/" />
+    <environment include="Development">
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+              asp-fallback-href="css/bootstrap/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"
+              crossorigin="anonymous"
+              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" />
+
+        <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/site.css" />
+    </environment>
+</head>
+<body>
+    <app>
+        @(await Html.RenderComponentAsync<App>())
+    </app>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="_framework/blazor.server.js"></script>
+    <script src="~/js/js.cookie.js"></script>
+    <script src="~/js/script.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap">
+    </script>
+</body>
+</html>
+
+@functions
+{
+    public static string Title { get; set; } = "Hunter";
+}

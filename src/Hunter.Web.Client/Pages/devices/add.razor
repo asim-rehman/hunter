@@ -1,0 +1,90 @@
+﻿@page "/devices/add"
+@using Hunter.Web.Client.Models
+@using Hunter.Web.Client.Models.Entities
+@using Hunter.Web.Client.Services
+@using Hunter.Web.Client.Components
+@inject DevicesService DeviceService
+@inject IUriHelper UriHelper
+@inherits BasePage
+
+
+<Header Title="Add Device" ShowLoader="@ShowLoader" />
+<AjaxResponse Status="@addResponse.Status" Content="@addResponse.Content" />
+
+<EditForm Model="@addResponse" OnValidSubmit="@Save">
+    <ValidationSummary />
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Name</label>
+        </div>
+        <div class="col-sm-5">
+            <InputText @bind-value="@addResponse.Entity.Name" Id="Name" class="form-control" />
+            <small id="nameHelp" class="form-text text-muted">(required)  The name of the device</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Manufacturer</label>
+        </div>
+        <div class="col-sm-5">
+            <InputText @bind-value="@addResponse.Entity.Manufacturer" Id="Manufacturer" class="form-control" />
+            <small id="manufacturerHelp" class="form-text text-muted">(required)  Device manufacturer</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <label>Model</label>
+        </div>
+        <div class="col-sm-5">
+            <InputText @bind-value="@addResponse.Entity.Model" Id="Model" Class="form-control" />
+            <small id="modelHelp" class="form-text text-muted">(required) The device model</small>
+        </div>
+    </div>
+
+    <div class="actionbar">
+        <a class="btn btn-secondary" href="devices">
+            <span class="fa fa-arrow-left"></span>
+            Back
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <span class="fa fa-save"></span>
+            Save
+        </button>
+    </div>
+</EditForm>
+
+@functions
+{
+
+    ResponseModel<Devices> addResponse = new ResponseModel<Devices>();
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        addResponse.Entity = new Devices();
+    }
+
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+    }
+
+    private async Task Save()
+    {
+
+        ShowLoader = true;
+        addResponse = await DeviceService.Create(addResponse.Entity);
+        addResponse.Entity = new Devices();
+        if (addResponse.Status == Enums.ResponseType.success.GetName())
+        {
+            ShowLoader = false;
+            UriHelper.NavigateTo("/devices");
+        }
+
+        ShowLoader = false;
+    }
+}
+
+}
